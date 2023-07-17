@@ -22,10 +22,10 @@ export default class NewBill {
     const fileName = filePath[filePath.length - 1]
     console.log('fileName:', fileName);
 
-    // Get gile extension
+    // Récupère l'extention
     const fileExtension = fileName.split(".").pop().toLowerCase();
 
-    // Check if the file extension is not jpg, jpeg or png
+    // Vérifie si l'extention n'est pas jpg, jpeg or png
     if (fileExtension !== 'jpg' && fileExtension !== 'jpeg' && fileExtension !== 'png') {
       alert('Format de fichier invalide, seuls les jpg, jpeg et png sont autorisés.');
       return;
@@ -36,22 +36,6 @@ export default class NewBill {
     formData.append('file', file)
     formData.append('email', email)
 
-
-    //this.store
-      //.bills()
-      //.create({
-        //data: formData,
-        //headers: {
-          //noContentType: true
-       // }
-      //})
-      //.then(({ fileUrl, key }) => {
-        //console.log(fileUrl)
-        //this.billId = key
-        //this.fileUrl = fileUrl
-        //this.fileName = fileName
-      //}).catch(error => console.error(error))
-
     this.store
       .bills()
       .create({
@@ -60,10 +44,10 @@ export default class NewBill {
           noContentType: true
         }
       })
-      .then(({ filePath, key }) => {
-        console.log(filePath)  // change fileUrl to filePath
+      .then(({ fileUrl, key }) => {
+        onsole.log(fileUrl)
         this.billId = key
-        this.fileUrl = `http://localhost:5678/${filePath.replace('public\\', '')}`
+        this.fileUrl = fileUrl
         this.fileName = fileName
       }).catch(error => console.error(error))
   }
