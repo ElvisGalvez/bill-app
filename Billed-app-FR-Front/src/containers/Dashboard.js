@@ -155,13 +155,12 @@ export default class {
         .html("")
       this.counter ++
     }
-
+//Résolution du bug
     bills.forEach(bill => {
       $(`#open-bill${bill.id}`).off('click').click((e) => this.handleEditTicket(e, bill, bills))
     })
-
+    
     return bills
-
   }
 
   getBillsAllUsers = () => {

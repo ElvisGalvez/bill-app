@@ -32,7 +32,7 @@ export default class {
       return this.store
         .bills()
         .list()
-        .then(snapshot => {
+        .then(snapshot => { // ajout du tri
           const sortedSnapshot = snapshot.sort((a, b) => {
             return new Date(b.date) - new Date(a.date);
           });
