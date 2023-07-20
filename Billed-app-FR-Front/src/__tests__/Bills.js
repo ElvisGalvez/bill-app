@@ -27,7 +27,6 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByTestId('icon-window'))
       const windowIcon = screen.getByTestId('icon-window')
       expect(windowIcon.classList.contains("active-icon")).toBe(true);
-
     })
 
     //Vérification que les factures sont affichées dans l'ordre attendu.

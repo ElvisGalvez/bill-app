@@ -8,6 +8,7 @@ import NewBill from "../containers/NewBill.js";
 import { ROUTES} from "../constants/routes.js";
 jest.mock('../__mocks__/store');
 
+//My tests
 // Vérifie qu'un utilisateur peut sélectionner et charger un fichier lors de la création d'une nouvelle facture.
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page and I choose a file", () => {
