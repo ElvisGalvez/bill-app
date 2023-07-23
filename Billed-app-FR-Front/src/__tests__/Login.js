@@ -4,8 +4,9 @@
 
 import LoginUI from "../views/LoginUI";
 import Login from "../containers/Login.js";
-import { ROUTES } from "../constants/routes";
+import { ROUTES, ROUTES_PATH } from "../constants/routes";
 import { fireEvent, screen } from "@testing-library/dom";
+import { localStorageMock } from "../__mocks__/localStorage.js";
 
 describe("Given that I am a user on login page", () => {
   describe("When I do not fill fields and I click on employee button Login In", () => {
@@ -226,5 +227,181 @@ describe("Given that I am a user on login page", () => {
     test("It should renders HR dashboard page", () => {
       expect(screen.queryByText("Validations")).toBeTruthy();
     });
+  });
+});
+
+
+//MY TESTS
+
+// Verify that the createUser method is called when employee login fails
+describe("Given an employee login attempt", () => {
+  test("When login fails, Then it should call createUser", done => {
+    // Given
+    document.body.innerHTML = LoginUI();
+    const inputData = {
+      email: "johndoe@email.com",
+      password: "azerty",
+    };
+    
+    const inputEmailUser = screen.getByTestId("employee-email-input");
+    fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+
+    const inputPasswordUser = screen.getByTestId("employee-password-input");
+    fireEvent.change(inputPasswordUser, { target: { value: inputData.password } });
+
+    const form = screen.getByTestId("form-employee");
+
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: jest.fn(() => null),
+        setItem: jest.fn(() => null),
+      },
+      writable: true,
+    });
+
+    const onNavigate = jest.fn();
+    const store = { login: jest.fn().mockRejectedValue(new Error('Login failed')) };
+    const login = new Login({
+      document,
+      localStorage: window.localStorage,
+      onNavigate,
+      PREVIOUS_LOCATION: "",
+      store,
+    });
+
+    login.createUser = jest.fn().mockResolvedValue({});
+
+    const handleSubmit = jest.fn(login.handleSubmitEmployee);
+    form.addEventListener("submit", handleSubmit);
+
+    // When
+    fireEvent.submit(form);
+    
+    // Then
+    setTimeout(() => {
+      expect(login.createUser).toHaveBeenCalled();
+      expect(login.createUser).toHaveBeenCalledWith({
+        type: "Employee",
+        email: inputData.email,
+        password: inputData.password,
+        status: "connected",
+      });
+      done();
+    }, 0);
+  });
+});
+
+// Verify that the createUser method is called when admin login fails
+describe("Given an admin login attempt", () => {
+  test("When login fails, Then it should call createUser", done => {
+    // Given
+    document.body.innerHTML = LoginUI();
+    const inputData = {
+      email: "admin@email.com",
+      password: "azerty",
+    };
+
+    const inputEmailAdmin = screen.getByTestId("admin-email-input");
+    fireEvent.change(inputEmailAdmin, { target: { value: inputData.email } });
+
+    const inputPasswordAdmin = screen.getByTestId("admin-password-input");
+    fireEvent.change(inputPasswordAdmin, { target: { value: inputData.password } });
+
+    const form = screen.getByTestId("form-admin");
+
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: jest.fn(() => null),
+        setItem: jest.fn(() => null),
+      },
+      writable: true,
+    });
+
+    const onNavigate = jest.fn();
+    const store = { login: jest.fn().mockRejectedValue(new Error('Login failed')) };
+    const login = new Login({
+      document,
+      localStorage: window.localStorage,
+      onNavigate,
+      PREVIOUS_LOCATION: "",
+      store,
+    });
+
+    login.createUser = jest.fn().mockResolvedValue({});
+
+    const handleSubmit = jest.fn(login.handleSubmitAdmin);
+    form.addEventListener("submit", handleSubmit);
+
+    // When
+    fireEvent.submit(form);
+
+    // Then
+    setTimeout(() => { //ensure the the expect assertions is run after the form has been submitted and any promises have been resolved or rejected.
+      expect(login.createUser).toHaveBeenCalled();
+      expect(login.createUser).toHaveBeenCalledWith({
+        type: "Admin",
+        email: inputData.email,
+        password: inputData.password,
+        status: "connected",
+      });
+      done();
+    }, 0); // specifies the delay before the execution of the callback
+  });
+});
+
+// Verify that a JWT is stored upon successful login
+describe("Given a successful login attempt", () => {
+  test("When the login method is called, Then it should set JWT in local storage", async () => {
+    // Given
+    const mockUser = {
+      email: 'test@example.com',
+      password: 'testpassword',
+    };
+    const mockJwt = 'fake.jwt.token';
+
+    const store = {
+      login: jest.fn().mockResolvedValue({ jwt: mockJwt }),
+    };
+    const localStorageSpy = jest.spyOn(window.localStorage, 'setItem');
+
+    const login = new Login({
+      document,
+      localStorage: window.localStorage,
+      onNavigate: jest.fn(),
+      PREVIOUS_LOCATION: "",
+      store,
+    });
+
+    // When
+    await login.login(mockUser);
+
+    // Then
+    expect(store.login).toHaveBeenCalledWith(JSON.stringify(mockUser));
+    expect(localStorageSpy).toHaveBeenCalledWith('jwt', mockJwt);
+  });
+});
+
+// Verify that null is returned when attempting to log in without a store
+describe("Given no store in the Login class", () => {
+  test("When login method is called, Then it should return null", async () => {
+    // Given
+    const login = new Login({
+      document: document,
+      localStorage: window.localStorage,
+      onNavigate: jest.fn(),
+      PREVIOUS_LOCATION: "",
+      // we do not provide a store for this test
+    });
+
+    const mockUser = {
+      email: 'test@example.com',
+      password: 'testpassword',
+    };
+
+    // When
+    const result = await login.login(mockUser);
+
+    // Then
+    expect(result).toBeNull();
   });
 });
